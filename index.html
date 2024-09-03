@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interface API Chatbot</title>
+</head>
+<body>
+  <h1>Interface API Chatbot</h1>
+  <form id="question-form">
+    <label for="query">Masukkan Pertanyaan:</label>
+    <input type="text" id="query" name="query_text" required>
+    <button type="submit">Kirim</button>
+  </form>
+  <div id="response">
+    <h2>Respons dari LLM:</h2>
+    <p id="response-text"></p>
+    <h3>Sumber:</h3>
+    <ul id="sources-list"></ul>
+  </div>
+
+  <script>
+    // Menangani pengiriman form dengan JavaScript
+    document.getElementById('question-form').addEventListener('submit', async function(event) {
+      event.preventDefault(); // Mencegah reload halaman
+
+      const queryText = document.getElementById('query').value;
+      
+      try {
+        const response = await fetch('/ask', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ query_text: queryText })
+        });
+
+        const data = await response.json();
+        document.getElementById('response-text').textContent = data.response;
+        
+        // Menampilkan sumber informasi
+        const sourcesList = document.getElementById('sources-list');
+        sourcesList.innerHTML = ''; // Kosongkan list sebelumnya
+        data.sources.forEach(source => {
+          const listItem = document.createElement('li');
+          listItem.textContent = source;
+          sourcesList.appendChild(listItem);
+        });
+
+      } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('response-text').textContent = 'Terjadi kesalahan saat memproses permintaan.';
+      }
+    });
+  </script>
+</body>
+</html>
